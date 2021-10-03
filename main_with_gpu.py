@@ -8,7 +8,7 @@ from collections import deque
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, LSTM, CuDNLSTM, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
 # starting constants
@@ -123,16 +123,16 @@ print(f"VALIDATION Dont buys: {validate_y.count(0)}, buys: {validate_y.count(1)}
 # Build the model
 
 model = Sequential()
-model.add(LSTM(128,input_shape=(train_x.shape[1:]), return_sequences=True))
-model.add(Dropout(0.2))
+model.add(CuDNNLSTM(128,input_shape=(train_x.shape[1:]), return_sequences=True))
+model.add(Droupout(0.2))
 model.add(BatchNormalization())
 
-model.add(LSTM(128,input_shape=(train_x.shape[1:]), return_sequences=True))
-model.add(Dropout(0.1))
+model.add(CuDNNLSTM(128,input_shape=(train_x.shape[1:]), return_sequences=True))
+model.add(Droupout(0.1))
 model.add(BatchNormalization())
 
-model.add(LSTM(128,input_shape=(train_x.shape[1:])))
-model.add(Dropout(0.2))
+model.add(CuDNNLSTM(128,input_shape=(train_x.shape[1:])))
+model.add(Droupout(0.2))
 model.add(BatchNormalization()) 
 
 model.add(Dense(32, activation="relu"))
@@ -142,16 +142,11 @@ model.add(Dense(2, activation="softmax" ))
 
 opt = tf.keras.optimizers.Adam(lr=0.001, decay=1e-6)
 
-model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=["accuracy"])
+model.compile(loss='sparse-categorical_crossentropy', optimizer=opt, metrics=["accuracy"])
 
 tensorboard = TensorBoard(log_dir=f"/tmp/logs/{NAME}")
-filepath = "RNN_Final-{epoch:02d}-{val_accuracy:.3f}"  # unique file name that will include the epoch and the validation acc for that epoch
-checkpoint = ModelCheckpoint("models/{}.model".format(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')) # saves only the best ones
-
-train_x = np.asarray(train_x)
-train_y = np.asarray(train_y)
-validate_x = np.asarray(validate_x)
-validate_y = np.asarray(validate_y)
+filepath = "RNN_Final-{epoch:02d}-{val_acc:.3f}"  # unique file name that will include the epoch and the validation acc for that epoch
+checkpoint = ModelCheckpoint("models/{}.model".format(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')) # saves only the best ones
 
 history = model.fit(
     train_x, train_y,
