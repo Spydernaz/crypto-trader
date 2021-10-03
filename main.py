@@ -98,24 +98,34 @@ main_df.dropna(inplace=True)
 
 main_df["future"] = main_df[f"{COIN_TO_PREDICT}_close"].shift(-FUTURE_PERIOD_PREDICT)
 main_df["target"] = list(map(classify, main_df[f"{COIN_TO_PREDICT}_close"], main_df["future"] ))
-# print(main_df[[f"{COIN_TO_PREDICT}_close","future", "target"]].head(10))
-# print(main_df.dtypes)
+print(main_df[[f"{COIN_TO_PREDICT}_close","future", "target"]].tail(10))
+print(main_df.dtypes)
+
+
 
 times = sorted(main_df.index.values)
 
 last_5percent = times[-int(0.05*len(times))]
 
-validation_main_df = main_df[(main_df.index >= last_5percent)]
-main_df = main_df[(main_df.index < last_5percent)]
+# validation_main_df = main_df[(main_df.index >= last_5percent)]
+# main_df = main_df[(main_df.index < last_5percent)]
 
 
 train_x, train_y = preprocess_df(main_df)
-validate_x, validate_y = preprocess_df(validation_main_df)
+
+FivePercentIndex = int(-(len(train_x)*0.05))
+
+print(f"\n\n{FivePercentIndex}\n\n")
+
+validate_x = train_x[FivePercentIndex:]
+train_x = train_x[:FivePercentIndex]
+validate_y = train_y[FivePercentIndex:]
+train_y = train_y[:FivePercentIndex]
 
 
 print(f"train data: {len(train_x)} validation: {len(validate_x)}")
-print(f"Dont buys: {train_y.count(0)}, buys: {train_y.count(1)}")
-print(f"VALIDATION Dont buys: {validate_y.count(0)}, buys: {validate_y.count(1)}")
+print(f"Dont buy: {train_y.count(0)}, buys: {train_y.count(1)}")
+print(f"VALIDATION Dont buy: {validate_y.count(0)}, buys: {validate_y.count(1)}")
 
 
 
