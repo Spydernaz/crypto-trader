@@ -2,7 +2,7 @@
 import os, random, time
 import pandas as pd
 import numpy as np
-import cryptodata as cd
+import deeperData as cd
 from sklearn import preprocessing
 from collections import deque
 
@@ -12,12 +12,12 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
 # starting constants
-SEQ_LEN = 60
-FUTURE_PERIOD_PREDICT = 3
-COIN_TO_PREDICT = "dot"
+SEQ_LEN = 90
+FUTURE_PERIOD_PREDICT = 5
+COIN_TO_PREDICT = "poly"
 EPOCHS = 10
 BATCH_SIZE = 64
-NAME = f"{SEQ_LEN}-SEQ-{FUTURE_PERIOD_PREDICT}-PRED-{int(time.time())}"
+NAME = f"{SEQ_LEN}-SEQ-{FUTURE_PERIOD_PREDICT}-PRED-{COIN_TO_PREDICT}-{int(time.time())}"
 
 coinlist = list(cd.coindata.keys())
 main_df = pd.DataFrame()
@@ -98,8 +98,8 @@ main_df.dropna(inplace=True)
 
 main_df["future"] = main_df[f"{COIN_TO_PREDICT}_close"].shift(-FUTURE_PERIOD_PREDICT)
 main_df["target"] = list(map(classify, main_df[f"{COIN_TO_PREDICT}_close"], main_df["future"] ))
-print(main_df[[f"{COIN_TO_PREDICT}_close","future", "target"]].tail(10))
-print(main_df.dtypes)
+# print(main_df[[f"{COIN_TO_PREDICT}_close","future", "target"]].tail(10))
+# print(main_df.dtypes)
 
 
 
@@ -115,18 +115,18 @@ train_x, train_y = preprocess_df(main_df)
 
 FivePercentIndex = int(-(len(train_x)*0.05))
 
-print(f"\n\n{FivePercentIndex}\n\n")
+# print(f"\n\n{FivePercentIndex}\n\n")
 
 validate_x = train_x[FivePercentIndex:]
 train_x = train_x[:FivePercentIndex]
 validate_y = train_y[FivePercentIndex:]
 train_y = train_y[:FivePercentIndex]
 
-
+print(f"\n\n---------------\nData Counts\n---------------")
 print(f"train data: {len(train_x)} validation: {len(validate_x)}")
 print(f"Dont buy: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Dont buy: {validate_y.count(0)}, buys: {validate_y.count(1)}")
-
+print(f"\n\n")
 
 
 
@@ -138,7 +138,7 @@ model.add(Dropout(0.2))
 model.add(BatchNormalization())
 
 model.add(LSTM(128,input_shape=(train_x.shape[1:]), return_sequences=True))
-model.add(Dropout(0.1))
+model.add(Dropout(0.2))
 model.add(BatchNormalization())
 
 model.add(LSTM(128,input_shape=(train_x.shape[1:])))
