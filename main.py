@@ -12,7 +12,7 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
 # starting constants
-SEQ_LEN = 20
+SEQ_LEN = 60
 FUTURE_PERIOD_PREDICT = 3
 COIN_TO_PREDICT = "dot"
 EPOCHS = 10
